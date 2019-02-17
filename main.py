@@ -2,8 +2,9 @@ import time
 from random import randint, choice
 from time import sleep
 import telebot
+from os import environ
 
-TeleBot = telebot.TeleBot('779667318:AAFO_3Ptkf2Y7uYstagrckMrBqpt9criQEo')
+TeleBot = telebot.TeleBot(environ['token'])
 
 PING = 1
 PONG = -1
