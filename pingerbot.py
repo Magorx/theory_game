@@ -42,18 +42,15 @@ class Situation:
         cur_time = time.time()
         
         if cur_time - self.last_ping_check > self.ping_freq:
-            TeleBot.send_message(self.user.chat_id, 'Check time for {}!'.format(self.name))
+            user.warn_ping(self)
             self.last_ping_check = cur_time
         
-        if self.last_answer_time - self.last_ping_check < 0 and cur_time - self.last_ping_check > self.ping_length:
+        if self.last_answer_time < self.last_ping_check and cur_time - self.last_ping_check > self.ping_length:
             self.emergency_level += 1
             self.last_answer_time
-            TeleBot.send_message(self.user.chat_id, 'Emergency for {}!'.format(self.name))
+            self.user.warn_emergency(self)
             for pinger in self.pingers:
-                if self.emergency_level >= len(self.emergency_texts):
-                    TeleBot.send_message(pinger.chat_id, 'Maximum emergency for {}!'.format(self.name))
-                else:
-                    TeleBot.send_message(pinger.chat_id, self.emergency_texts[self.emergency_level])
+                pinger.warn_ping_not_given(self)
 
 
 class User:
@@ -68,6 +65,23 @@ class User:
         self.friends = []
         self.pingers = []
         self.extreme_pingers = []
+
+    def warn_ping(self, situation):
+        TeleBot.send_message(self.chat_id, 'Ping time for {}!'.format(self.name))
+
+    def warn_ping_not_given(self, situation):
+        TeleBot.send_message(self.chat_id, 'Person is having trouble in {}!'.format(self.name))
+        self.send_emergency_text(situation)
+
+    def warn_emergency(self, situation):
+        TeleBot.send_message(self.user.chat_id, 'Emergency was sent for {}!'.format(self.name))
+        self.send_emergency_text(situation)
+
+    def send_emergency_text(self, situation):
+        if self.emergency_level >= len(self.emergency_texts):
+            TeleBot.send_message(pinger.chat_id, 'Maximum emergency for {}!'.format(situation.name))
+        else:
+            TeleBot.send_message(pinger.chat_id, situation.emergency_texts[situation.emergency_level])
 
 
 def user_by_id(user_id):
